@@ -8,9 +8,9 @@
     "test": "mocha test/*.js",
     "pretest": "npm run build",
     "build": "rollup -c",
-	"prebuild": "rm -rf dist/*",
-	"version": "git add -A dist",
-	"preversion": "npm run test"
+    "prebuild": "rm -rf dist/*",
+    "version": "git add -A dist",
+    "preversion": "npm run test"
   },
   "keywords": [
     "rollup",
@@ -23,7 +23,7 @@
   "dependencies": {
     "babel-runtime": "^6.26.0",
     "fs-extra": "^0.30.0",
-    "less": "^2.7.1",
+    "less": "^3.8.1",
     "rollup": "^0.34.7",
     "rollup-pluginutils": "^1.5.1"
   },
