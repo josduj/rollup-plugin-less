@@ -8,7 +8,9 @@
     "test": "mocha test/*.js",
     "pretest": "npm run build",
     "build": "rollup -c",
-    "prebuild": "rm -rf dist/*"
+	"prebuild": "rm -rf dist/*",
+	"version": "git add -A dist",
+	"preversion": "npm run test"
   },
   "keywords": [
     "rollup",
