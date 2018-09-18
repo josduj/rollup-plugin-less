@@ -5,10 +5,12 @@
   "main": "dist/rollup-plugin-less.js",
   "jsnext:main": "dist/rollup-plugin-less.mjs",
   "scripts": {
+	"lint": "eslint src/**/*.js",
+	"lint-fix": "npm run lint -- --fix",
     "test": "mocha test/*.js",
     "pretest": "npm run build",
     "build": "rollup -c",
-    "prebuild": "rm -rf dist/*",
+    "prebuild": "npm run lint && rm -rf dist/*",
     "version": "git add -A dist",
     "preversion": "npm run test"
   },
