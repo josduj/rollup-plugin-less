@@ -4,15 +4,17 @@ import less from 'less';
 import { createFilter } from 'rollup-pluginutils';
 import { insertStyle } from './style.js';
 
-
 let renderSync = (code, option) => {
-    return less.render(code, option)
-        .then(function(output){
-            return output.css;
-        }, function(error){
-            throw error;
-        })
+	// https://github.com/less/less.js/issues/2325
+	let css;
+	option.syncImport = true;
+	less.render(code, option, function (err, output) {
+		if (err) throw err;
+		css = output.css;
+	});
+	return css;
 };
+
 
 let fileCount = 0;
 
@@ -26,48 +28,44 @@ export default function plugin (options = {}) {
         intro() {
             return options.insert ? insertStyle.toString().replace(/insertStyle/, injectFnName) : '';
         },
-        async transform(code, id) {
+        transform(code, id) {
             if (!filter(id)) {
                 return null;
             }
             fileCount++;
 
-            try {
-                options.option = options.option || {};
-                options.option['filename'] = id;
-                options.output = options.output || 'rollup.build.css';
-                if (options.plugins) {
-                  options.option['plugins'] = options.plugins
-                }
+			options.option = options.option || {};
+			options.option['filename'] = id;
+			options.output = options.output || 'rollup.build.css';
+			if (options.plugins) {
+				options.option['plugins'] = options.plugins
+			}
 
-                let css = await renderSync(code, options.option);
+			let css = renderSync(code, options.option);
 
-                if(options.output&&isFunc(options.output)){
-                    css = await options.output(css, id);
-                }
+			if(options.output&&isFunc(options.output)){
+				css = options.output(css, id);
+			}
 
-                if (options.output&&isString(options.output)) {
-                    if(fileCount == 1){
-                        //clean the output file
-                        fs.removeSync(options.output);
-                    }
-                    fs.appendFileSync(options.output, css);
-                }
+			if (options.output&&isString(options.output)) {
+				if(fileCount == 1){
+					//clean the output file
+					fs.removeSync(options.output);
+				}
+				fs.appendFileSync(options.output, css);
+			}
 
-                let exportCode = '';
+			let exportCode = '';
 
-                if(options.insert!=false){
-                    exportCode = `export default ${injectFnName}(${JSON.stringify(css.toString())});`;
-                }else{
-                    exportCode = `export default ${JSON.stringify(css.toString())};`;
-                }
-                return {
-                    code: exportCode,
-                    map: { mappings: '' }
-                };
-            } catch (error) {
-                throw error;
-            }
+			if(options.insert!=false){
+				exportCode = `export default ${injectFnName}(${JSON.stringify(css.toString())});`;
+			}else{
+				exportCode = `export default ${JSON.stringify(css.toString())};`;
+			}
+			return {
+				code: exportCode,
+				map: { mappings: '' }
+			};
         }
     };
 };
